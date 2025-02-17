@@ -1,0 +1,147 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة إكس وأو</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        h1 {
+            color: #333;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 10px;
+            justify-content: center;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            font-size: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #333;
+            cursor: pointer;
+        }
+        .cell.taken {
+            cursor: not-allowed;
+        }
+        .cell.X {
+            color: blue;
+        }
+        .cell.O {
+            color: red;
+        }
+        #winner {
+            margin-top: 20px;
+            font-size: 24px;
+            color: green;
+        }
+        #restart {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .score {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>لعبة إكس وأو</h1>
+    <div class="board">
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+    </div>
+    <div class="score">
+        نقاط X: <span id="scoreX">0</span> | نقاط O: <span id="scoreO">0</span>
+    </div>
+    <div id="winner"></div>
+    <button id="restart" onclick="restartGame()">إعادة اللعب</button>
+
+    <script>
+        const cells = document.querySelectorAll("[data-cell]");
+        const winnerText = document.getElementById("winner");
+        const scoreXText = document.getElementById("scoreX");
+        const scoreOText = document.getElementById("scoreO");
+        let currentPlayer = "X";
+        let board = Array(9).fill(null);
+        let scoreX = 0;
+        let scoreO = 0;
+
+        function checkWinner() {
+            const winningCombinations = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+                [0, 4, 8], [2, 4, 6]             // Diagonals
+            ];
+
+            for (const combination of winningCombinations) {
+                const [a, b, c] = combination;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    return board[a];
+                }
+            }
+            return null;
+        }
+
+        function handleClick(e) {
+            const cell = e.target;
+            const cellIndex = Array.from(cells).indexOf(cell);
+
+            if (board[cellIndex] || winnerText.textContent) return;
+
+            board[cellIndex] = currentPlayer;
+            cell.textContent = currentPlayer;
+            cell.classList.add("taken", currentPlayer);
+
+            const winner = checkWinner();
+            if (winner) {
+                winnerText.textContent = `الفائز: ${winner}`;
+                if (winner === "X") scoreX++;
+                if (winner === "O") scoreO++;
+                scoreXText.textContent = scoreX;
+                scoreOText.textContent = scoreO;
+                return;
+            }
+
+            if (!board.includes(null)) {
+                winnerText.textContent = "تعادل!";
+                return;
+            }
+
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+        }
+
+        function restartGame() {
+            board.fill(null);
+            cells.forEach(cell => {
+                cell.textContent = "";
+                cell.classList.remove("taken", "X", "O");
+            });
+            winnerText.textContent = "";
+            currentPlayer = "X";
+        }
+
+        cells.forEach(cell => {
+            cell.addEventListener("click", handleClick);
+        });
+    </script>
+</body>
+</html>
